@@ -12,15 +12,16 @@ intents = discord.Intents.default()
 intents.messages = True
 intents.guilds = True
 intents.members = True
+intents.message_content = True  # เพิ่ม intent นี้สำหรับการรับข้อความ
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # //////////////////// Bot Event /////////////////////////
 @bot.event
 async def on_ready():
-    print("Bot Online!")
+    print(f"Bot Online! Logged in as {bot.user}")
     try:
-        synced = await bot.tree.sync()
+        synced = await bot.tree.sync()  # Syncing slash commands
         print(f"{len(synced)} command(s) synced")
     except Exception as e:
         print(f"Error syncing commands: {e}")
@@ -56,7 +57,7 @@ async def on_message(message):
     elif mes == 'hi bot':
         await message.channel.send(f"Hello, {message.author.name}")
 
-    await bot.process_commands(message)
+    await bot.process_commands(message)  # This is important for processing commands
 
 # ///////////////////// Commands /////////////////////
 @bot.command()
