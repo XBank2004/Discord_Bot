@@ -1,16 +1,15 @@
 import os
 import discord
-import yt_dlp
-import asyncio
+import datetime
 from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
-import ffmpeg
 
 # โหลด environment variables
-load_dotenv()
+load_dotenv()  # ใช้ไฟล์ .env โหลดข้อมูลที่เก็บไว้
 TOKEN = os.getenv('TOKEN')
 
+# ตั้งค่าบอท
 intents = discord.Intents.default()
 intents.messages = True
 intents.guilds = True
@@ -71,49 +70,6 @@ async def hello(ctx):
 async def test(ctx, *, arg):
     await ctx.send(arg)
 
-# ///////////////////// Music Command /////////////////////
-
-# ฟังก์ชันสำหรับเชื่อมต่อกับช่องเสียง
-async def connect_to_voice_channel(ctx):
-    voice_channel = ctx.author.voice.channel
-    voice_client = await voice_channel.connect()
-    return voice_client
-
-# ฟังก์ชันดาวน์โหลดเพลงจาก URL
-def download_song(url):
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'extractaudio': True,  # Extract audio only
-        'audioquality': 1,  # Best quality
-        'outtmpl': 'downloads/%(id)s.%(ext)s',  # Save with video id as filename
-        'restrictfilenames': True,
-        'noplaylist': True,  # Disable playlist downloads
-        'quiet': True,
-    }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        return ydl.prepare_filename(info)
-
-# ฟังก์ชันสำหรับเล่นเพลง
-@bot.command()
-async def play(ctx, url: str):
-    voice_client = await connect_to_voice_channel(ctx)
-    song_path = download_song(url)
-
-    # เล่นเพลงที่ดาวน์โหลด
-    voice_client.play(discord.FFmpegPCMAudio(song_path), after=lambda e: print('done', e))
-
-    await ctx.send(f"Now playing: {url}")
-
-# ฟังก์ชันสำหรับหยุดเพลง
-@bot.command()
-async def stop(ctx):
-    voice_client = ctx.voice_client
-    if voice_client.is_playing():
-        voice_client.stop()
-    await voice_client.disconnect()
-    await ctx.send("Stopped the music and disconnected.")
-
 # Slash Commands
 @bot.tree.command(name='hellobot', description='Replies with Hello')
 async def hellocommand(interaction: discord.Interaction):
@@ -135,8 +91,6 @@ async def helpcommand(interaction: discord.Interaction):
     embed.add_field(name='/hellobot', value='Hello Command', inline=True)
     embed.add_field(name='/name', value='Name Command', inline=True)
     embed.add_field(name='/help', value='Show commands', inline=False)
-    embed.add_field(name='/play <url>', value='Play music from YouTube', inline=True)
-    embed.add_field(name='/stop', value='Stop the music and disconnect', inline=True)
 
     embed.set_footer(text='Bot by YourName')
 
